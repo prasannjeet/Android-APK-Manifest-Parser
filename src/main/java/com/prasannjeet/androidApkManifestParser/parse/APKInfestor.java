@@ -43,9 +43,49 @@ public class APKInfestor {
     extractDataFromApk();
   }
 
+  public static String inputStreamToString(InputStream is) throws IOException {
+    StringBuilder sb = new StringBuilder();
+    String line;
+    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    while ((line = br.readLine()) != null) {
+      sb.append(line);
+    }
+    br.close();
+    return sb.toString();
+  }
+
+  public static XmlMapper getXmlMapper() {
+    XmlMapper xmlMapper = new XmlMapper();
+    xmlMapper.configure(Feature.ALLOW_COMMENTS, true);
+    xmlMapper.configure(Feature.IGNORE_UNDEFINED, true);
+    xmlMapper.configure(Feature.ALLOW_SINGLE_QUOTES, true);
+    xmlMapper.configure(Feature.STRICT_DUPLICATE_DETECTION, false);
+    xmlMapper.configure(Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+    xmlMapper.configure(Feature.ALLOW_MISSING_VALUES, true);
+    return xmlMapper;
+  }
+
+  public static String sortAndPrettyXml(File xmlFile) throws Exception {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    FileInputStream fis = new FileInputStream(xmlFile);
+    SortXMLEngine engine = new SortXMLEngine();
+    engine.sort(fis, os);
+
+    String sorted = os.toString(StandardCharsets.UTF_8);
+    return prettyXml(sorted);
+  }
+
+  public static String prettyXml(String xml) throws Exception {
+    StringInputStream inputStream = new StringInputStream(xml);
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    XMLPrettyPrinter.prettify(inputStream, outputStream);
+
+    return outputStream.toString(StandardCharsets.UTF_8);
+  }
+
   public void extractDataFromApk() {
     String tempDir = System.getProperty("java.io.tmpdir");
-    String myTempDir = tempDir  + System.currentTimeMillis();
+    String myTempDir = tempDir + System.currentTimeMillis();
 
     File tempDirFile = null;
     String manifestXml = "";
@@ -70,7 +110,7 @@ public class APKInfestor {
 
     } catch (Exception e) {
       e.printStackTrace();
-    } finally{
+    } finally {
       try {
         FileUtils.deleteDirectory(tempDirFile);
       } catch (Exception e) {
@@ -78,7 +118,7 @@ public class APKInfestor {
       }
     }
 
-    //Save manifestXml to file
+    // Save manifestXml to file
     try {
       File manifestFile = new File(outputDirectory + File.separator + "AndroidManifestExtracted.xml");
       FileOutputStream fos = new FileOutputStream(manifestFile);
@@ -91,7 +131,9 @@ public class APKInfestor {
   }
 
   public List<String> getAllIntents() {
-    return this.intents.stream().filter(intent -> intent.contains("android.intent.action")).collect(toList());
+    return this.intents.stream()
+        .filter(intent -> intent.contains("android.intent.action"))
+        .collect(toList());
   }
 
   public Map<String, List<String>> getIntentsByActivity() {
@@ -133,8 +175,6 @@ public class APKInfestor {
             toMap(Entry::getKey, item -> item.getValue().stream().distinct().collect(toList())));
   }
 
-
-
   private void explodeAPKToDirectory(File outputDir)
       throws AndrolibException, IOException, DirectoryException {
     ApkDecoder decoder = new ApkDecoder();
@@ -143,45 +183,5 @@ public class APKInfestor {
     decoder.setOutDir(outputDir);
     decoder.setAnalysisMode(true);
     decoder.decode();
-  }
-
-  public static String inputStreamToString(InputStream is) throws IOException {
-    StringBuilder sb = new StringBuilder();
-    String line;
-    BufferedReader br = new BufferedReader(new InputStreamReader(is));
-    while ((line = br.readLine()) != null) {
-      sb.append(line);
-    }
-    br.close();
-    return sb.toString();
-  }
-
-  public static XmlMapper getXmlMapper() {
-    XmlMapper xmlMapper = new XmlMapper();
-    xmlMapper.configure(Feature.ALLOW_COMMENTS, true);
-    xmlMapper.configure(Feature.IGNORE_UNDEFINED, true);
-    xmlMapper.configure(Feature.ALLOW_SINGLE_QUOTES, true);
-    xmlMapper.configure(Feature.STRICT_DUPLICATE_DETECTION, false);
-    xmlMapper.configure(Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-    xmlMapper.configure(Feature.ALLOW_MISSING_VALUES, true);
-    return xmlMapper;
-  }
-
-  public static String sortAndPrettyXml(File xmlFile) throws Exception {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    FileInputStream fis = new FileInputStream(xmlFile);
-    SortXMLEngine engine = new SortXMLEngine();
-    engine.sort(fis, os);
-
-    String sorted = os.toString(StandardCharsets.UTF_8);
-    return prettyXml(sorted);
-  }
-
-  public static String prettyXml(String xml) throws Exception {
-    StringInputStream inputStream = new StringInputStream(xml);
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    XMLPrettyPrinter.prettify(inputStream, outputStream);
-
-    return outputStream.toString(StandardCharsets.UTF_8);
   }
 }

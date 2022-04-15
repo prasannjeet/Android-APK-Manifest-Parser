@@ -10,11 +10,14 @@ import java.util.List;
 public class manifest {
   @JsonProperty("uses-sdk")
   public usessdk usessdk;
+
   @JsonProperty("uses-permission")
   @JacksonXmlElementWrapper(useWrapping = false)
   public List<usespermission> usespermission;
+
   @JacksonXmlElementWrapper(useWrapping = false)
   public List<permission> permission;
+
   @JsonProperty("application")
   public Application application;
 
@@ -82,8 +85,10 @@ public class manifest {
     @JsonProperty("action")
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<Action> actions;
+
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<category> category;
+
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<data> data;
 
@@ -105,6 +110,7 @@ public class manifest {
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Activity {
     public String name;
+
     @JsonProperty("intent-filter")
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<IntentFilter> intentFilters;
@@ -129,6 +135,7 @@ public class manifest {
     @JsonProperty("meta-data")
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<metadata> metadata;
+
     @JsonProperty("activity")
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<Activity> activities;
@@ -147,7 +154,4 @@ public class manifest {
       return list;
     }
   }
-
 }
-
-
